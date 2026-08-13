@@ -52,10 +52,19 @@ repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc --all)
 echo ""
 
 echo ">>> Applying post-sync fixes..."
-sed -i "s|#define BTM_BYPASS_EXTRA_ACL_SETUP BtmBypassExtraAclSetup()|#define BTM_BYPASS_EXTRA_ACL_SETUP FALSE|" device/phh/treble/bluetooth/bdroid_buildcfg.h
-echo "BTM bypass fix applied"
-curl -s -o frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp https://github.com/amaxsky/los18.1gsi/raw/refs/heads/main/TouchInputMapper.cpp
-echo "TouchInputMapper.cpp replaced"
+if [ -f device/phh/treble/bluetooth/bdroid_buildcfg.h ]; then
+    sed -i "s|#define BTM_BYPASS_EXTRA_ACL_SETUP BtmBypassExtraAclSetup()|#define BTM_BYPASS_EXTRA_ACL_SETUP FALSE|" device/phh/treble/bluetooth/bdroid_buildcfg.h
+    echo "BTM bypass fix applied"
+else
+    echo "WARNING: bdroid_buildcfg.h not found, skipping BTM fix"
+fi
+
+if [ -d frameworks/native/services/inputflinger/reader/mapper ]; then
+    curl -s -o frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp https://github.com/amaxsky/los18.1gsi/raw/refs/heads/main/TouchInputMapper.cpp
+    echo "TouchInputMapper.cpp replaced"
+else
+    echo "WARNING: TouchInputMapper dir not found, skipping"
+fi
 echo ""
 
 echo "Setting up build environment"

@@ -53,10 +53,11 @@ echo ""
 
 echo ">>> Applying post-sync fixes..."
 if [ -f device/phh/treble/bluetooth/bdroid_buildcfg.h ]; then
-    sed -i "s|#define BTM_BYPASS_EXTRA_ACL_SETUP BtmBypassExtraAclSetup()|#define BTM_BYPASS_EXTRA_ACL_SETUP FALSE|" device/phh/treble/bluetooth/bdroid_buildcfg.h
+    sed -i 's/^#define BTM_BYPASS_EXTRA_ACL_SETUP.*/#define BTM_BYPASS_EXTRA_ACL_SETUP FALSE/' device/phh/treble/bluetooth/bdroid_buildcfg.h
+    grep 'BTM_BYPASS_EXTRA_ACL_SETUP' device/phh/treble/bluetooth/bdroid_buildcfg.h
     echo "BTM bypass fix applied"
 else
-    echo "WARNING: bdroid_buildcfg.h not found, skipping BTM fix"
+    echo "WARNING: bdroid_buildcfg.h not found"
 fi
 
 if [ -d frameworks/native/services/inputflinger/reader/mapper ]; then

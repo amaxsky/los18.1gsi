@@ -60,8 +60,12 @@ else
 fi
 
 if [ -d frameworks/native/services/inputflinger/reader/mapper ]; then
-    curl -s -o frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp https://github.com/amaxsky/los18.1gsi/raw/refs/heads/main/TouchInputMapper.cpp
-    echo "TouchInputMapper.cpp replaced"
+    wget -q -O frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp https://github.com/amaxsky/los18.1gsi/raw/refs/heads/main/TouchInputMapper.cpp
+    if [ -s frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp ]; then
+        echo "TouchInputMapper.cpp replaced"
+    else
+        echo "WARNING: TouchInputMapper.cpp download failed or empty"
+    fi
 else
     echo "WARNING: TouchInputMapper dir not found, skipping"
 fi

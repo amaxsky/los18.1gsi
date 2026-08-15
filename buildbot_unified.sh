@@ -56,6 +56,8 @@ if [ -f device/phh/treble/bluetooth/bdroid_buildcfg.h ]; then
     sed -i 's/^#define BTM_BYPASS_EXTRA_ACL_SETUP.*/#define BTM_BYPASS_EXTRA_ACL_SETUP FALSE/' device/phh/treble/bluetooth/bdroid_buildcfg.h
     grep 'BTM_BYPASS_EXTRA_ACL_SETUP' device/phh/treble/bluetooth/bdroid_buildcfg.h
     echo "BTM bypass fix applied"
+    rm -rf out/soong/.intermediates/system/bt/stack/libbt-stack
+    echo "Cleared BT stack cache"
 else
     echo "WARNING: bdroid_buildcfg.h not found"
 fi

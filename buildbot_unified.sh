@@ -51,46 +51,6 @@ echo "Syncing repos"
 repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc --all)
 echo ""
 
-echo ">>> Applying post-sync fixes..."
-echo "--- Finding all bdroid_buildcfg.h files ---"
-find device/phh/treble -name 'bdroid_buildcfg.h' 2>/dev/null
-
-echo ""
-echo "--- Files containing BtmBypassExtraAclSetup ---"
-grep -rl 'BtmBypassExtraAclSetup' device/phh/treble/ 2>/dev/null
-
-echo ""
-echo "--- Before fix ---"
-grep -r 'BTM_BYPASS_EXTRA_ACL_SETUP' device/phh/treble/bluetooth/bdroid_buildcfg.h 2>/dev/null
-
-find device/phh/treble -name 'bdroid_buildcfg.h' 2>/dev/null | while read f; do
-    if grep -q 'BtmBypassExtraAclSetup()' "$f" 2>/dev/null; then
-        echo ""
-        echo "Fixing: $f"
-        echo "  Before:"
-        grep 'BTM_BYPASS_EXTRA_ACL_SETUP' "$f"
-        sed -i 's/^#define BTM_BYPASS_EXTRA_ACL_SETUP.*/#define BTM_BYPASS_EXTRA_ACL_SETUP FALSE/' "$f"
-        echo "  After:"
-        grep 'BTM_BYPASS_EXTRA_ACL_SETUP' "$f"
-    fi
-done
-
-rm -rf out/soong/.intermediates/system/bt/stack/libbt-stack
-echo ""
-echo "BTM bypass fix applied"
-
-if [ -d frameworks/native/services/inputflinger/reader/mapper ]; then
-    wget -q -O frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp https://github.com/amaxsky/los18.1gsi/raw/refs/heads/main/TouchInputMapper.cpp
-    if [ -s frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp ]; then
-        echo "TouchInputMapper.cpp replaced"
-    else
-        echo "WARNING: TouchInputMapper.cpp download failed or empty"
-    fi
-else
-    echo "WARNING: TouchInputMapper dir not found, skipping"
-fi
-echo ""
-
 echo "Setting up build environment"
 source build/envsetup.sh &> /dev/null
 mkdir -p ~/build-output
@@ -155,6 +115,30 @@ then
     apply_patches patches_${MODE}_personal
 fi
 finalize_${MODE}
+echo ""
+
+echo ">>> Applying late fixes..."
+find device/phh/treble -name 'bdroid_buildcfg.h' | while read f; do
+    if grep -q 'BtmBypassExtraAclSetup()' "$f" 2>/dev/null; then
+        sed -i 's/^#define BTM_BYPASS_EXTRA_ACL_SETUP.*/#define BTM_BYPASS_EXTRA_ACL_SETUP FALSE/' "$f"
+        echo "Fixed: $f"
+        grep 'BTM_BYPASS_EXTRA_ACL_SETUP' "$f"
+    fi
+done
+
+if [ -d frameworks/native/services/inputflinger/reader/mapper ]; then
+    wget -q -O frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp https://github.com/amaxsky/los18.1gsi/raw/refs/heads/main/TouchInputMapper.cpp
+    if [ -s frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp ]; then
+        echo "TouchInputMapper.cpp replaced"
+    else
+        echo "WARNING: TouchInputMapper.cpp download failed or empty"
+    fi
+else
+    echo "WARNING: TouchInputMapper dir not found, skipping"
+fi
+
+rm -rf out/soong/.intermediates/system/bt/stack/libbt-stack
+echo "Late fixes applied"
 echo ""
 
 for var in "${@:2}"

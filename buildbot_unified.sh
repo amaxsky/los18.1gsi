@@ -52,15 +52,32 @@ repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc --all)
 echo ""
 
 echo ">>> Applying post-sync fixes..."
-if [ -f device/phh/treble/bluetooth/bdroid_buildcfg.h ]; then
-    sed -i 's/^#define BTM_BYPASS_EXTRA_ACL_SETUP.*/#define BTM_BYPASS_EXTRA_ACL_SETUP FALSE/' device/phh/treble/bluetooth/bdroid_buildcfg.h
-    grep 'BTM_BYPASS_EXTRA_ACL_SETUP' device/phh/treble/bluetooth/bdroid_buildcfg.h
-    echo "BTM bypass fix applied"
-    rm -rf out/soong/.intermediates/system/bt/stack/libbt-stack
-    echo "Cleared BT stack cache"
-else
-    echo "WARNING: bdroid_buildcfg.h not found"
-fi
+echo "--- Finding all bdroid_buildcfg.h files ---"
+find device/phh/treble -name 'bdroid_buildcfg.h' 2>/dev/null
+
+echo ""
+echo "--- Files containing BtmBypassExtraAclSetup ---"
+grep -rl 'BtmBypassExtraAclSetup' device/phh/treble/ 2>/dev/null
+
+echo ""
+echo "--- Before fix ---"
+grep -r 'BTM_BYPASS_EXTRA_ACL_SETUP' device/phh/treble/bluetooth/bdroid_buildcfg.h 2>/dev/null
+
+find device/phh/treble -name 'bdroid_buildcfg.h' 2>/dev/null | while read f; do
+    if grep -q 'BtmBypassExtraAclSetup()' "$f" 2>/dev/null; then
+        echo ""
+        echo "Fixing: $f"
+        echo "  Before:"
+        grep 'BTM_BYPASS_EXTRA_ACL_SETUP' "$f"
+        sed -i 's/^#define BTM_BYPASS_EXTRA_ACL_SETUP.*/#define BTM_BYPASS_EXTRA_ACL_SETUP FALSE/' "$f"
+        echo "  After:"
+        grep 'BTM_BYPASS_EXTRA_ACL_SETUP' "$f"
+    fi
+done
+
+rm -rf out/soong/.intermediates/system/bt/stack/libbt-stack
+echo ""
+echo "BTM bypass fix applied"
 
 if [ -d frameworks/native/services/inputflinger/reader/mapper ]; then
     wget -q -O frameworks/native/services/inputflinger/reader/mapper/TouchInputMapper.cpp https://github.com/amaxsky/los18.1gsi/raw/refs/heads/main/TouchInputMapper.cpp

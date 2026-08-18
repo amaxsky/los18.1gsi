@@ -99,7 +99,7 @@ build_treble() {
         (*) echo "Invalid target - exiting"; exit 1;;
     esac
     lunch lineage_${TARGET}-userdebug
-    make installclean
+    make clean
     make -j$(nproc --all) systemimage
     make vndk-test-sepolicy
     mv $OUT/system.img ~/build-output/lineage-18.1-$BUILD_DATE-UNOFFICIAL-${TARGET}$(${PERSONAL} && echo "-personal" || echo "").img

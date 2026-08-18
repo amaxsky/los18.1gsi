@@ -78,7 +78,10 @@ finalize_treble() {
     rm -f device/*/sepolicy/common/private/genfs_contexts
     cd device/phh/treble
     git clean -fdx
+    echo "Running generate.sh..."
     bash generate.sh lineage
+    echo "generate.sh exit code: $?"
+    ls lineage_arm64_bvS.mk 2>/dev/null || echo "MISSING: lineage_arm64_bvS.mk"
     cd ../../..
 }
 

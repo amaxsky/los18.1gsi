@@ -736,7 +736,8 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
             mSurfaceRight = mSurfaceLeft + naturalLogicalWidth;
             mSurfaceBottom = mSurfaceTop + naturalLogicalHeight;
 
-            mSurfaceOrientation = mViewport.orientation;
+            mSurfaceOrientation =
+                    mParameters.orientationAware ? mViewport.orientation : DISPLAY_ORIENTATION_0;
         } else {
             mPhysicalWidth = rawWidth;
             mPhysicalHeight = rawHeight;
@@ -3630,7 +3631,7 @@ void TouchInputMapper::rotateAndScale(float& x, float& y) {
     // 90 - swap x/y and reverse y.
     // 180 - reverse x, y.
     // 270 - swap x/y and reverse x.
-    switch (mSurfaceOrientation) {
+    switch ((mSurfaceOrientation + 1) % 4) {
         case DISPLAY_ORIENTATION_0:
             x = xScaled + mXTranslate;
             y = yScaled + mYTranslate;

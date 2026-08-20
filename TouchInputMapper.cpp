@@ -597,6 +597,11 @@ std::optional<DisplayViewport> TouchInputMapper::findViewport() {
             viewport = mConfig.getDisplayViewportByType(ViewportType::VIEWPORT_INTERNAL);
         }
 
+        if (viewport && viewportTypeToUse == ViewportType::VIEWPORT_INTERNAL) {
+           viewport->orientation =
+                (DisplayOrientation)((viewport->orientation + 1) % 4);
+        }
+        
         return viewport;
     }
 
@@ -3631,7 +3636,7 @@ void TouchInputMapper::rotateAndScale(float& x, float& y) {
     // 90 - swap x/y and reverse y.
     // 180 - reverse x, y.
     // 270 - swap x/y and reverse x.
-    switch ((mSurfaceOrientation + 1) % 4) {
+    switch (mSurfaceOrientation) {
         case DISPLAY_ORIENTATION_0:
             x = xScaled + mXTranslate;
             y = yScaled + mYTranslate;

@@ -599,7 +599,8 @@ std::optional<DisplayViewport> TouchInputMapper::findViewport() {
 
         if (viewport && viewportTypeToUse == ViewportType::VIEWPORT_INTERNAL) {
            viewport->orientation =
-                (DisplayOrientation)((viewport->orientation + 1) % 4);
+        static_cast<decltype(viewport->orientation)>(
+            (viewport->orientation + 1) % 4);
         }
         
         return viewport;
